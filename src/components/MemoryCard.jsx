@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function MemoryCard({ memory, onClose }) {
   const [visible, setVisible] = useState(false);
@@ -181,12 +182,18 @@ export default function MemoryCard({ memory, onClose }) {
       {/* Main Slideshow Area */}
       <div className="slideshow-content">
         {editedPhotos.length > 0 ? (
-          <img 
-            key={photoIndex} 
-            src={editedPhotos[photoIndex]} 
-            alt="slide" 
-            className={`slideshow-image swipe-${slideDirection}`} 
-          />
+          <AnimatePresence mode="wait">
+            <motion.img 
+              key={photoIndex} 
+              src={editedPhotos[photoIndex]} 
+              alt="slide" 
+              className="slideshow-image"
+              initial={{ opacity: 0, x: slideDirection === "right" ? 50 : -50, filter: "blur(5px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: slideDirection === "right" ? -50 : 50, filter: "blur(5px)" }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            />
+          </AnimatePresence>
         ) : (
           <div style={{ color: 'white' }}>No photos available</div>
         )}
@@ -326,8 +333,6 @@ export default function MemoryCard({ memory, onClose }) {
 
         .slideshow-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10; padding: 80px 0; overflow: hidden; pointer-events: none; }
         .slideshow-image { max-width: 100%; max-height: 100vh; object-fit: contain; box-shadow: 0 20px 60px rgba(0,0,0,0.5); pointer-events: auto; }
-        .slideshow-image.swipe-right { animation: swipeRight 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .slideshow-image.swipe-left { animation: swipeLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         
         .ss-nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: white; font-size: 40px; font-weight: 200; padding: 20px; cursor: pointer; opacity: 0; transition: opacity 0.3s; z-index: 20; text-shadow: 0 4px 12px rgba(0,0,0,0.5); pointer-events: auto; }
         .slideshow-content:hover .ss-nav-arrow { opacity: 0.5; }
@@ -376,15 +381,6 @@ export default function MemoryCard({ memory, onClose }) {
         .ss-add-more-btn { width: 80px; height: 80px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.05); flex-shrink: 0; transition: background 0.2s; }
         .ss-add-more-btn:hover { background: rgba(255,255,255,0.1); border-color: white; }
         .ss-add-more-btn span { color: rgba(255,255,255,0.5); font-size: 32px; font-weight: 200; }
-        
-        @keyframes swipeRight {
-          from { opacity: 0; filter: blur(5px); transform: translateX(30px) scale(0.98); }
-          to { opacity: 1; filter: blur(0); transform: translateX(0) scale(1); }
-        }
-        @keyframes swipeLeft {
-          from { opacity: 0; filter: blur(5px); transform: translateX(-30px) scale(0.98); }
-          to { opacity: 1; filter: blur(0); transform: translateX(0) scale(1); }
-        }
         
         @media (max-width: 800px) {
           .slideshow-navbar { padding: 20px 20px; }
